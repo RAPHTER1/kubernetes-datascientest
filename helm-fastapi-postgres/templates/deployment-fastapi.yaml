@@ -18,12 +18,12 @@ spec:
         image: {{ .Values.fastapi.image.repository }}:{{ .Values.fastapi.image.tag }}
         imagePullPolicy: {{ .Values.fastapi.image.pullPolicy }}
         resources:
-          requests:
-            cpu: "{{ .Values.fastapi.resources.requests.cpu }}"
-            memory: "{{ .Values.fastapi.resources.requests.memory }}"
-          limits:
-            cpu: "{{ .Values.fastapi.resources.limits.cpu }}"
-            memory: "{{ .Values.fastapi.resources.limits.memory }}"
+          # requests:
+          #   cpu: "{{ .Values.fastapi.resources.requests.cpu }}"
+          #   memory: "{{ .Values.fastapi.resources.requests.memory }}"
+          # limits:
+          #   cpu: "{{ .Values.fastapi.resources.limits.cpu }}"
+          #   memory: "{{ .Values.fastapi.resources.limits.memory }}"
         ports:
         - containerPort: {{ .Values.fastapi.ports.api.number }}
           name: {{ .Values.fastapi.ports.api.name }}

@@ -37,12 +37,12 @@ spec:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
         resources:
-          requests:
-            cpu: "{{ .Values.postgres.resources.requests.cpu }}"
-            memory: "{{ .Values.postgres.resources.requests.memory }}"
-          limits:
-            cpu: "{{ .Values.postgres.resources.limits.cpu }}"
-            memory: "{{ .Values.postgres.resources.limits.memory }}"
+          # requests:
+          #   cpu: "{{ .Values.postgres.resources.requests.cpu }}"
+          #   memory: "{{ .Values.postgres.resources.requests.memory }}"
+          # limits:
+          #   cpu: "{{ .Values.postgres.resources.limits.cpu }}"
+          #   memory: "{{ .Values.postgres.resources.limits.memory }}"
   volumeClaimTemplates:
   - metadata:
       name: postgres-storage
