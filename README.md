@@ -6,6 +6,7 @@
 - [Configuration Parameters in `values.yaml`](#configuration-parameters-in-valuesyaml)
 - [Environment-Specific Configuration](#environment-specific-configuration)
 - [Testing and Validation](#testing-and-validation)
+- [Backup and Restore](#backup-and-restore)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
