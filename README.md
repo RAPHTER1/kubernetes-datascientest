@@ -238,6 +238,75 @@ To check service details:
 kubectl get svc -n standard
 ```
 
+## Backup and Restore
+
+### ETCD Snapshots
+
+Etcd is the core database that stores all Kubernetes cluster state information, including configurations, workloads, and metadata. Regular backups are essential to prevent data loss and facilitate disaster recovery.
+
+To create a snapshot of your `etcd` database, use:
+
+```sh
+sudo k3s etcd-snapshot save --etcd-snapshot-dir <path/to/backups>
+```
+
+This command generates a backup file, typically named `on-demand-ip-xxxx`, which can be used to restore your cluster if needed.
+
+#### Storing Snapshots Securely
+
+##### Using Rsync
+
+To transfer snapshots to a remote server for redundancy:
+
+```sh
+rsync -avz <path/to/backups> user@remote-server:/backup/location/
+```
+
+##### Using AWS S3 Bucket Storage
+
+To upload snapshots to an AWS S3 bucket for offsite storage using the AWS CLI:
+
+```sh
+aws s3 cp <path/to/backups> s3://your-s3-bucket-name/
+```
+
+You can also directly save etcd snapshots to an S3 bucket using K3s:
+
+```sh
+sudo k3s etcd-snapshot save --s3 --s3-bucket your-s3-bucket-name --s3-endpoint your-s3-endpoint --s3-access-key your-access-key --s3-secret-key your-secret-key --etcd-snapshot-dir <path/to/backups>
+```
+
+This command uploads the snapshot directly to the specified S3 bucket without requiring manual transfers.
+
+For more information: [AWS S3 Documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
+
+### Restore Process
+
+Restoring your cluster from an etcd snapshot involves reinstalling K3s and applying the backup to bring back your cluster state.
+
+#### Steps to Restore:
+
+```sh
+# Step 1: Uninstall existing K3s installation (if needed)
+k3s-uninstall.sh
+
+# Step 2: Reinstall K3s with cluster initialization
+curl -sfL https://get.k3s.io | K3S_TOKEN=SECRET sh -s - server --cluster-init --docker
+
+# Step 3: Ensure proper permissions for the kubeconfig file
+sudo chmod 644 /etc/rancher/k3s/k3s.yaml
+
+# Step 4: Restore the etcd snapshot
+sudo k3s server --cluster-reset --cluster-reset-restore-path <path/to/on-demand-ip-xxxx>
+
+# Step 5: Restart the K3s service
+sudo systemctl restart k3s
+
+# Step 6: Verify that the cluster is running correctly
+kubectl get nodes      # Check node status
+kubectl get pods -A    # Verify all pods are running
+```
+
 ## Frequently Asked Questions (FAQ)
 
 ### **How do I encode credentials in Base64 for Kubernetes secrets?**
@@ -297,6 +366,36 @@ To increase the number of replicas:
 ```bash
 kubectl scale deployment fastapi-deployment --replicas=5 -n standard
 ```
+
+## Why can't I access etcd snapshots in K3s?
+
+If `etcdctl snapshot save` doesn’t work, it's because **K3s is using SQLite instead of etcd**.
+
+By default, K3s uses SQLite for single-node deployments, which does not support etcd snapshots. Etcd is required for high availability and distributed data consistency in a multi-node setup.
+
+If you installed K3s without `--cluster-init`, uninstall and reinstall it with etcd enabled:
+
+```sh
+k3s-uninstall.sh
+curl -sfL https://get.k3s.io | sh -s - server --cluster-init (--docker)
+```
+
+This ensures K3s uses **etcd** instead of SQLite.
+
+## Why can't I access etcd snapshots in K3s?
+
+If `etcdctl snapshot save` doesn’t work, it's because **K3s is using SQLite instead of etcd**.
+
+By default, K3s uses SQLite for single-node deployments, which does not support etcd snapshots. Etcd is required for high availability and distributed data consistency in a multi-node setup.
+
+If you installed K3s without `--cluster-init`, uninstall and reinstall it with etcd enabled:
+
+```sh
+k3s-uninstall.sh
+curl -sfL https://get.k3s.io | sh -s - server --cluster-init (--docker)
+```
+
+This ensures K3s uses **etcd** instead of SQLite.
 
 ## Acknowledgements
 
