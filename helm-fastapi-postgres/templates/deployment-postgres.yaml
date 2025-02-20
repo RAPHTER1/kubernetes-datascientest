@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  serviceName: {{ .Values.postgres.service }}
+  replicas: {{ .Values.postgres.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.postgres.image }}
+        ports:
+        - containerPort: {{ .Values.postgres.port }}
+        envFrom:
+        - secretRef:
+            name: db-credentials
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: POSTGRES_DB
+        - name: POSTGRES_HOST_AUTH_METHOD
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: POSTGRES_HOST_AUTH_METHOD
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            cpu: "{{ .Values.postgres.resources.requests.cpu }}"
+            memory: "{{ .Values.postgres.resources.requests.memory }}"
+          limits:
+            cpu: "{{ .Values.postgres.resources.limits.cpu }}"
+            memory: "{{ .Values.postgres.resources.limits.memory }}"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ {{ .Values.postgres.storage.accessModes }} ]
+      storageClassName: {{ .Values.postgres.storage.storageClassName }}
+      resources:
+        requests:
+          storage: {{ .Values.postgres.storage.storageSize }}

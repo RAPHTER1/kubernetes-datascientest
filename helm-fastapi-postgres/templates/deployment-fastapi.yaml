@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi
+spec:
+  replicas: {{ .Values.fastapi.replicaCount }}
+  selector:
+    matchLabels:
+      app: fastapi
+  template:
+    metadata:
+      labels:
+        app: fastapi
+    spec:
+      containers:
+      - name: fastapi
+        image: {{ .Values.fastapi.image.repository }}:{{ .Values.fastapi.image.tag }}
+        imagePullPolicy: {{ .Values.fastapi.image.pullPolicy }}
+        resources:
+          requests:
+            cpu: "{{ .Values.fastapi.resources.requests.cpu }}"
+            memory: "{{ .Values.fastapi.resources.requests.memory }}"
+          limits:
+            cpu: "{{ .Values.fastapi.resources.limits.cpu }}"
+            memory: "{{ .Values.fastapi.resources.limits.memory }}"
+        ports:
+        - containerPort: {{ .Values.fastapi.ports.api.number }}
+          name: {{ .Values.fastapi.ports.api.name }}
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: POSTGRES_PASSWORD
+          - name: POSTGRES_DB
+            valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_DB
+          - name: DATABASE_HOST
+            value: {{ .Values.postgres.service }}
+          - name: DATABASE_PORT
+            value: "{{ .Values.postgres.port }}"
