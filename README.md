@@ -2,6 +2,7 @@
 - [FastAPI-PostgreSQL Microservices Deployment](#fastapi-postgresql-microservices-deployment)
 - [Setting Up Your Environment](#setting-up-your-environment)
 - [Kubernetes Objects](#kubernetes-objects)
+- [Updates in `config/db.py`](#updates-in-configdbpy)
 - [Configuration Parameters in `values.yaml`](#configuration-parameters-in-valuesyaml)
 - [Environment-Specific Configuration](#environment-specific-configuration)
 - [Testing and Validation](#testing-and-validation)
@@ -9,8 +10,8 @@
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
 
----
-# 🚀 Scalable Microservices Deployment: FastAPI & PostgreSQL
+
+# 🚀 FastAPI-PostgreSQL Microservices Deployment
 
 This project deploys a Kubernetes infrastructure for a **FastAPI** application and a **PostgreSQL** database. The deployment is managed using **Helm** and **K3s**, a lightweight Kubernetes distribution.
 
@@ -27,11 +28,12 @@ cd kubernetes-datascientest
 
 ### 2️⃣ Build and Configure the Docker Image
 
-Before deploying, you need to build the Docker image for the FastAPI application.
+Before deploying, you need to build the Docker image for the FastAPI application. We have optimized the original Python image by using a python-slim version, which reduces the image size and accelerates the deployment process if the image has not been built yet.
 
 #### Build the Image
 
 ```bash
+cd kubernetes-devops-projet
 docker build -t <your-image-name>:<tag> .
 ```
 
@@ -41,7 +43,7 @@ Alternatively, you can pull the image from Docker Hub instead of building it man
 docker pull raphter1/fastapi-app:latest
 ```
 
-⚠ **If you do it that way, you will need to set `imagePullPolicy` to `Always` or `IfNotPresent`.** See the [values.yaml configuration](#deploying-with-helm) below.
+⚠ **If you do it that way, you will need to set `imagePullPolicy` to `Always` or `IfNotPresent`.** See the [values.yaml configuration](#configuration-parameters-in-valuesyaml) below.
 
 ### 3️⃣ Install K3s
 
@@ -122,8 +124,6 @@ After deploying, check if the pods are running correctly:
 kubectl get pods -n standard
 ```
 
----
-
 ## Kubernetes Objects
 
 ### Overview
@@ -146,7 +146,10 @@ These services are deployed on a **Kubernetes cluster** using Helm for easier ma
 
 - **Persistent Storage Note:** Initially, a **PersistentVolumeClaim inside a StatefulSet** was used for PostgreSQL storage. However, for unknown reasons, it did not automatically create a PersistentVolume. As a workaround, a **PersistentVolume was manually defined** to ensure reliable database storage.
 
----
+## Updates in `config/db.py`
+
+The original `db.py` file in the `kubernetes-devops-project` repository was modified to use environment variables instead of hardcoded database credentials. This change enhances the security and flexibility of the deployment by allowing database connection settings to be managed dynamically through Kubernetes Secrets and ConfigMaps.
+To check the new implementation, refer to `kubernetes-devops-project/config/db.py` in repository.
 
 ## Configuration Parameters in `values.yaml`
 
@@ -169,7 +172,7 @@ These services are deployed on a **Kubernetes cluster** using Helm for easier ma
 | `fastapi.ports.api.name` | Name of the port                 | `http`                   |
 | `fastapi.service.type`  | Type of service (`NodePort`)      | `NodePort`               |
 | `fastapi.service.port`  | Port exposed in the container     | `80`                     |
-| `fastapi.service.nodePort` | NodePort for external access  | `30080`                  |
+| `fastapi.service.nodePort` | NodePort for external access  | `32132`                  |
 
 ### **PostgreSQL Configuration**
 
@@ -191,14 +194,13 @@ These services are deployed on a **Kubernetes cluster** using Helm for easier ma
 | `postgres.resources.limits.cpu` | CPU resource limits     | `2`                        |
 | `postgres.resources.limits.memory` | Memory resource limits | `2Gi`                     |
 
----
 
 ## Environment-Specific Configuration
 
 This project includes different configuration files for different environments:
 
 - **`values-prod.yaml`**: Used for production deployment.
-- **`values-stage.yaml`**: Used for staging environment before production deployment.
+- **`values-stage.yaml`**: Used for staging environment deployment.
 
 You can specify which configuration to use by running Helm with:
 
@@ -221,7 +223,7 @@ To ensure everything is working correctly, you can test the microservices using 
 You can test these endpoints by navigating to:
 
 ```bash
-http://<NODE_IP>:30001/docs
+http://<NODE_IP>:<NodePort>/docs
 ```
 
 where `<NODE_IP>` is the IP of the node running the FastAPI service.
