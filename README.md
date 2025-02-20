@@ -103,7 +103,7 @@ Once Helm is installed, you can deploy the Kubernetes infrastructure.
 #### Launch the Deployment
 
 ```bash
-helm install <project-name> <path/to/helm/folder> -f <path/to/values.yaml> -n standard --create-namespace
+helm install <project-name> <path/to/helm/folder> -f <path/to/values.yaml> -n <namespace> --create-namespace
 ```
 
 #### Test the Template Before Deployment
