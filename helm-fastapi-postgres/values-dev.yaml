@@ -1,15 +1,22 @@
-postgres:
-  replicaCount: 1
-  resources:
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-    limits:
-      cpu: "2"
-      memory: "2Gi"
+global:
+  namespace: dev
+  environment: development
 
 fastapi:
   replicaCount: 1
+  image:
+    tag: dev
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+postgres:
+  storage:
+    storageSize: "5Gi"
   resources:
     requests:
       cpu: "250m"

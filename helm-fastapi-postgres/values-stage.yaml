@@ -1,0 +1,24 @@
+global:
+  namespace: stage
+  environment: staging
+
+fastapi:
+  replicaCount: 2
+  image:
+    tag: stage
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "750m"
+      memory: "1Gi"
+
+postgres:
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "750Mi"
+    limits:
+      cpu: "1.5"
+      memory: "1.5Gi"
